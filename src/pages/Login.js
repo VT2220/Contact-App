@@ -49,7 +49,10 @@ const Login = () => {
   return (
     <div className="centerElement">
       <div className="box">
-        <h6 className="text-center text-danger">Login</h6>
+        <img src={require("../images/logo.png").default} className="logo-img" />
+        <div className="text-center mt-3 mb-2" style={{ fontSize: "1.1em" }}>
+          <b>Login</b>
+        </div>
         <FinalForm
           onSubmit={(formObj) => {
             loginUser(formObj);
@@ -70,9 +73,7 @@ const Login = () => {
                   )}
                 </Field>
               </FormGroup>
-              <Button color="primary" className="rounded-pill">
-                Login
-              </Button>
+              <Button className="glass-btn">Login</Button>
               <Alert
                 color="danger"
                 isOpen={errorAlert}
@@ -86,7 +87,13 @@ const Login = () => {
           )}
         />
         <div className="text-center mt-3">
-          Don't have account, <Link to="/registration">register here</Link>
+          Don't have account,{" "}
+          <Link
+            to="/registration"
+            style={{ color: "rgba(230, 24, 24, 0.63)", textDecoration: "none" }}
+          >
+            register here
+          </Link>
         </div>
       </div>
     </div>

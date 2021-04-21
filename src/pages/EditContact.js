@@ -18,9 +18,6 @@ const EditContact = () => {
   const history = useHistory();
   const { id } = useParams();
 
-  const [errorAlert, setErrorAlert] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
   const [checkbox, setCheckbox] = useState(false);
 
   const [preview, setPreview] = useState();
@@ -33,36 +30,8 @@ const EditContact = () => {
     };
   };
 
-  const onDismissError = () => setErrorAlert(false);
-
   const editContactFunction = (formObj) => {
-    setErrorAlert(false);
     const loginId = loginData && loginData.id;
-
-    if (!formObj.name || !formObj.phonenumber) {
-      setErrorAlert(true);
-      setErrorMsg("You have left one of the field empty");
-      return;
-    }
-
-    if (formObj.phonenumber.length !== 10) {
-      setErrorAlert(true);
-      setErrorMsg("Phone number must be of 10 digit only");
-      return;
-    }
-
-    const userContacts =
-      loginData && contactData[loginId].filter((d) => d.id !== id);
-    const phoneNumberExist = userContacts.find(
-      (d) => d.phonenumber === formObj.phonenumber
-    );
-
-    if (phoneNumberExist) {
-      setErrorAlert(true);
-      setErrorMsg("Phone number already exist");
-      return;
-    }
-
     if (formObj.checkbox) {
       formObj.photo = null;
     } else {
@@ -70,15 +39,42 @@ const EditContact = () => {
         formObj.photo = preview;
       }
     }
-
     if (formObj.checkbox) {
       delete formObj.checkbox;
     }
-
     contactData[loginId] = contactData[loginId].filter((d) => d.id !== id);
     contactData[loginId].push(formObj);
     dispatch(editContact(contactData));
     history.push("/contact");
+  };
+
+  const performValidation = (values) => {
+    const errors = {};
+    const loginId = loginData && loginData.id;
+    if (values.checkbox) {
+      setCheckbox(true);
+    } else {
+      setCheckbox(false);
+    }
+
+    if (!values.name) {
+      errors.name = "Required Field";
+    }
+    if (!values.phonenumber) {
+      errors.phonenumber = "Required Field";
+    } else if (values.phonenumber.length !== 10) {
+      errors.phonenumber = "Phone number must be of 10 digit only";
+    } else {
+      const userContacts =
+        loginData && contactData[loginId].filter((d) => d.id !== id);
+      const phoneNumberExist = userContacts.find(
+        (d) => d.phonenumber === values.phonenumber
+      );
+      if (phoneNumberExist) {
+        errors.phonenumber = "Phone number already exist";
+      }
+    }
+    return errors;
   };
 
   useEffect(() => {
@@ -86,39 +82,45 @@ const EditContact = () => {
   }, [id]);
 
   return (
-    <>
+    <div className="supreme-container">
       <Header />
-      <div className="centerElement">
+      <div className="d-flex justify-content-center position-relative">
         <div className="box">
-          <h6 className="text-center text-danger">Edit Contact Info</h6>
+          <h6 className="text-center mb-2">
+            <b>Edit Contact Info</b>
+          </h6>
           <FinalForm
             onSubmit={(formObj) => editContactFunction(formObj)}
-            validate={(values) => {
-              if (values.checkbox) {
-                setCheckbox(true);
-              } else {
-                setCheckbox(false);
-              }
-            }}
+            validate={performValidation}
             initialValues={singleContactData}
             render={({ handleSubmit }) => (
               <Form onSubmit={handleSubmit}>
-                <FormGroup>
-                  <Label for="name">Name</Label>
-
-                  <Field name="name">
-                    {({ input }) => <Input type="name" id="name" {...input} />}
-                  </Field>
-                </FormGroup>
-                <FormGroup>
-                  <Label for="phonenumber">PhoneNumber</Label>
-
-                  <Field name="phonenumber">
-                    {({ input }) => (
+                <Field name="name">
+                  {({ input, meta }) => (
+                    <FormGroup>
+                      <Label for="name">Name</Label>
+                      <Input type="name" id="name" {...input} />
+                      {meta.error && meta.touched && (
+                        <span className="text-danger ml-1 ">
+                          {meta.error} !
+                        </span>
+                      )}
+                    </FormGroup>
+                  )}
+                </Field>
+                <Field name="phonenumber">
+                  {({ input, meta }) => (
+                    <FormGroup>
+                      <Label for="phonenumber">Phone Number</Label>
                       <Input type="text" id="phonenumber" {...input} />
-                    )}
-                  </Field>
-                </FormGroup>
+                      {meta.error && meta.touched && (
+                        <span className="text-danger ml-1 ">
+                          {meta.error} !
+                        </span>
+                      )}
+                    </FormGroup>
+                  )}
+                </Field>
                 <Label>Photo</Label>
                 <div className="d-flex justify-content-between align-items-center">
                   <FormGroup>
@@ -137,20 +139,20 @@ const EditContact = () => {
                         />
                       )}
                     </Field>
-                    <Label id="fakeFileBtn" for="photo">
-                      Upload New Photo
+                    <Label className="btn glass-btn mr-3" for="photo">
+                      Change Photo
                     </Label>
                   </FormGroup>
                   <FormGroup>
                     <img
                       src={
                         checkbox
-                          ? require("../images/contactThumbnail.png").default
+                          ? require("../images/contactThumbnail.jpg").default
                           : preview
                           ? preview
                           : singleContactData.photo
                           ? singleContactData.photo
-                          : require("../images/contactThumbnail.png").default
+                          : require("../images/contactThumbnail.jpg").default
                       }
                       width="80px"
                       height="80px"
@@ -169,21 +171,10 @@ const EditContact = () => {
                     Default Photo
                   </Label>
                 </FormGroup>
-                <Alert
-                  color="danger"
-                  isOpen={errorAlert}
-                  toggle={onDismissError}
-                  className="mt-3"
-                >
-                  {errorMsg}
-                </Alert>
-                <Button color="primary" className="rounded-pill mt-3">
-                  Edit contact
-                </Button>{" "}
+                <Button className="glass-btn mt-3">Edit contact</Button>{" "}
                 <Button
-                  color="secondary"
                   onClick={() => history.push("/contact")}
-                  className="rounded-pill mt-3"
+                  className="glass-btn mt-3"
                 >
                   Cancel
                 </Button>
@@ -192,7 +183,15 @@ const EditContact = () => {
           />
         </div>
       </div>
-    </>
+      <img
+        src={require("../images/list-background.png").default}
+        id="reading-contact-img"
+      />
+      <img
+        src={require("../images/list-background1.png").default}
+        id="holding-phone-img"
+      />
+    </div>
   );
 };
 

@@ -47,14 +47,8 @@ const Header = () => {
   const [modal, setModal] = useState(false);
   const toggleModal = () => {
     setModal(!modal);
-    setErrorAlert(false);
     setPreview(null);
   };
-
-  const [errorAlert, setErrorAlert] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const onDismissError = () => setErrorAlert(false);
 
   const [preview, setPreview] = useState();
 
@@ -69,42 +63,9 @@ const Header = () => {
 
   const addContactFunction = (formObj) => {
     formObj.id = uuid();
-    if (!formObj.name || !formObj.email || !formObj.phonenumber) {
-      setErrorAlert(true);
-      setErrorMsg("You have left one of the field empty");
-      return;
-    }
-
-    if (formObj.phonenumber.length !== 10) {
-      setErrorAlert(true);
-      setErrorMsg("Phone number must be of 10 digit only");
-      return;
-    }
-
-    const id = loginData && loginData.id;
-    const emailExist =
-      contactData &&
-      contactData[id] &&
-      contactData[id].find((c) => c.email === formObj.email);
-    if (emailExist) {
-      setErrorAlert(true);
-      setErrorMsg("Email already exist");
-      return;
-    }
-    const phoneNumberExist =
-      contactData &&
-      contactData[id] &&
-      contactData[id].find((c) => c.phonenumber === formObj.phonenumber);
-    if (phoneNumberExist) {
-      setErrorAlert(true);
-      setErrorMsg("Phone number already exist");
-      return;
-    }
-
     if (formObj.photo) {
       formObj.photo = preview;
     }
-
     dispatch(addContact(formObj, loginData.id));
     toggleModal();
   };
@@ -115,19 +76,51 @@ const Header = () => {
     }
   }, []);
 
+  const required = (value) => (value ? undefined : "Required Field");
+
+  const emailExist = (value) => {
+    const id = loginData && loginData.id;
+    const emailExist =
+      contactData &&
+      contactData[id] &&
+      contactData[id].find((c) => c.email === value);
+    return emailExist ? "Email already exist" : undefined;
+  };
+
+  const phoneNumberExist = (value) => {
+    const id = loginData && loginData.id;
+    const phoneNumberExist =
+      contactData &&
+      contactData[id] &&
+      contactData[id].find((c) => c.phonenumber === value);
+    return phoneNumberExist ? "Phone number already exist" : undefined;
+  };
+
+  const composeValidators = (...validators) => (value) =>
+    validators.reduce(
+      (error, validator) => error || validator(value),
+      undefined
+    );
+
   return (
     <>
-      <Navbar color="primary">
+      <Navbar className="glass-navbar">
         <div>
           <NavbarBrand>
             <Link
               to="/home"
               style={{
                 textDecoration: "none",
-                color: "white",
+                color: "black",
               }}
+              className="d-flex"
             >
-              <span className="d-flex flex-column">
+              <img
+                src={require("../images/logo.png").default}
+                width="50px"
+                className="mr-3"
+              />
+              <span className="d-flex flex-column mt-1">
                 Contacts{" "}
                 <span
                   style={{
@@ -149,7 +142,7 @@ const Header = () => {
               <NavItem>
                 <NavLink
                   style={{
-                    color: "white",
+                    color: "black",
                     cursor: "pointer",
                   }}
                   onClick={toggleModal}
@@ -159,13 +152,13 @@ const Header = () => {
               </NavItem>
             </Nav>
           )}
-          <Link className="btn btn-danger rounded-pill" onClick={logout}>
+          <Link className="btn glass-btn" onClick={logout}>
             Logout
           </Link>
         </span>
       </Navbar>
       <Modal isOpen={modal} toggle={toggleModal} className="popUpModal">
-        <ModalHeader toggle={toggleModal}>Add contact</ModalHeader>
+        <ModalHeader>Add contact</ModalHeader>
 
         <FinalForm
           onSubmit={(formObj) => {
@@ -174,35 +167,51 @@ const Header = () => {
           render={({ handleSubmit }) => (
             <Form onSubmit={handleSubmit}>
               <ModalBody>
-                <FormGroup>
-                  <Label for="name">Name</Label>
-                  <Field name="name">
-                    {({ input }) => <Input type="name" id="name" {...input} />}
-                  </Field>
-                </FormGroup>
-                <FormGroup>
-                  <Label for="email">Email</Label>
-                  <Field name="email">
-                    {({ input }) => (
+                <Field name="name" validate={required}>
+                  {({ input, meta }) => (
+                    <FormGroup>
+                      <Label for="name">Name</Label>
+                      <Input type="name" id="name" {...input} />
+                      {meta.error && meta.touched && (
+                        <span className="ml-1 errors">{meta.error} !</span>
+                      )}
+                    </FormGroup>
+                  )}
+                </Field>
+                <Field
+                  name="email"
+                  validate={composeValidators(required, emailExist)}
+                >
+                  {({ input, meta }) => (
+                    <FormGroup>
+                      <Label for="email">Email</Label>
                       <Input type="email" id="email" {...input} />
-                    )}
-                  </Field>
-                </FormGroup>
-                <FormGroup>
-                  <Label for="phonenumber">PhoneNumber</Label>
-                  <Field name="phonenumber">
-                    {({ input }) => (
+                      {meta.error && meta.touched && (
+                        <span className="ml-1 errors">{meta.error} !</span>
+                      )}
+                    </FormGroup>
+                  )}
+                </Field>
+                <Field
+                  name="phonenumber"
+                  validate={composeValidators(required, phoneNumberExist)}
+                >
+                  {({ input, meta }) => (
+                    <FormGroup>
+                      <Label for="phonenumber">Phone Number</Label>
                       <Input type="text" id="phonenumber" {...input} />
-                    )}
-                  </Field>
-                </FormGroup>
-                <div className="d-flex justify-content-between">
+                      {meta.error && meta.touched && (
+                        <span className="ml-1 errors">{meta.error} !</span>
+                      )}
+                    </FormGroup>
+                  )}
+                </Field>
+                <Label>Photo</Label>
+                <div className="d-flex justify-content-between align-items-center">
                   <FormGroup>
-                    <Label for="photo">Photo</Label>
-
                     <Field name="photo">
                       {({ input }) => (
-                        <Input
+                        <input
                           type="file"
                           id="photo"
                           name={input.name}
@@ -211,10 +220,13 @@ const Header = () => {
                             input.onChange(e);
                             showPreview(e);
                           }}
+                          hidden
                         />
                       )}
                     </Field>
-                    {/* <Input type="file" id="photo"  /> */}
+                    <Label className="btn glass-btn" for="photo">
+                      Upload Photo
+                    </Label>
                   </FormGroup>
                   <FormGroup>
                     {preview && (
@@ -228,32 +240,10 @@ const Header = () => {
                     )}
                   </FormGroup>
                 </div>
-                {/* <Alert
-                  color="success"
-                  isOpen={successAlert}
-                  toggle={onDismissSuccess}
-                  className="mt-3"
-                >
-                  Contact created successfully.
-                </Alert> */}
-                <Alert
-                  color="danger"
-                  isOpen={errorAlert}
-                  toggle={onDismissError}
-                  className="mt-3"
-                >
-                  {errorMsg}
-                </Alert>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" className="rounded-pill">
-                  Add contact
-                </Button>{" "}
-                <Button
-                  color="secondary"
-                  onClick={toggleModal}
-                  className="rounded-pill"
-                >
+                <Button class="glass-btn">Add contact</Button>{" "}
+                <Button onClick={toggleModal} class="glass-btn">
                   Cancel
                 </Button>
               </ModalFooter>
@@ -264,19 +254,5 @@ const Header = () => {
     </>
   );
 };
-
-// const mapStateToProps = (state) => ({
-//   loginData: state.contactReducer.loginData,
-//   contactData: state.contactReducer.contactData,
-// });
-
-// const mapDispatchToProps = (dispatch) => ({
-//   signin: (user) => {
-//     dispatch(signin(user));
-//   },
-//   addContact: (contact) => {
-//     dispatch(addContact(contact));
-//   },
-// });
 
 export default Header;

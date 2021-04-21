@@ -49,13 +49,13 @@ const Contact = () => {
   };
 
   return (
-    <>
+    <div className="supreme-container">
       <Header />
       <Container className="mt-5">
         {userContacts.length ? (
           <div>
             {isDesktop ? (
-              <Table hover className="contact-list-table">
+              <Table hover className="contact-list-table" borderless>
                 <thead>
                   <tr>
                     <th>Photo</th>
@@ -72,18 +72,18 @@ const Contact = () => {
                         {c.photo ? (
                           <img
                             src={c.photo}
-                            width="40px"
-                            height="40px"
+                            width="50px"
+                            height="50px"
                             className="rounded-circle"
                             style={{ objectFit: "cover" }}
                           />
                         ) : (
                           <img
                             src={
-                              require("../images/contactThumbnail.png").default
+                              require("../images/contactThumbnail.jpg").default
                             }
-                            width="40px"
-                            height="40px"
+                            width="50px"
+                            height="50px"
                             className="rounded-circle"
                             style={{ objectFit: "cover" }}
                           />
@@ -119,9 +119,9 @@ const Contact = () => {
                 </tbody>
               </Table>
             ) : (
-              <ListGroup>
+              <ListGroup style={{ position: "relative", zIndex: "2" }}>
                 {userContacts.map((c, index) => (
-                  <ListGroupItem key={index} action>
+                  <ListGroupItem key={index}>
                     <Row>
                       <Col>
                         <span className="d-flex">
@@ -134,7 +134,7 @@ const Contact = () => {
                           ) : (
                             <img
                               src={
-                                require("../images/contactThumbnail.png")
+                                require("../images/contactThumbnail.jpg")
                                   .default
                               }
                               className="rounded-circle contact-img"
@@ -175,6 +175,14 @@ const Contact = () => {
         ) : (
           <div className="text-center">You have no contact saved</div>
         )}
+        <img
+          src={require("../images/list-background.png").default}
+          id="reading-contact-img"
+        />
+        <img
+          src={require("../images/list-background1.png").default}
+          id="holding-phone-img"
+        />
       </Container>
 
       {/* DELETEMODAL */}
@@ -183,18 +191,18 @@ const Contact = () => {
         toggle={toggleDeleteModal}
         className="popUpModal"
       >
-        <ModalHeader toggle={toggleDeleteModal}>Delete Contact</ModalHeader>
+        <ModalHeader>Delete Contact</ModalHeader>
         <ModalBody>Are you sure you want to delete this contact ?</ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={deleteContactFunction}>
+          <Button className="glass-btn" onClick={deleteContactFunction}>
             Delete
           </Button>{" "}
-          <Button color="secondary" onClick={toggleDeleteModal}>
+          <Button className="glass-btn" onClick={toggleDeleteModal}>
             Cancel
           </Button>
         </ModalFooter>
       </Modal>
-    </>
+    </div>
   );
 };
 

@@ -21,74 +21,87 @@ const Registration = () => {
 
   const registerUser = (formObj) => {
     setSuccessAlert(false);
-    setErrorAlert(false);
-    if (!formObj.email || !formObj.password || !formObj.confirmPassword) {
-      setErrorAlert(true);
-      setErrorMsg("You have left one of the field empty");
-      return;
+    formObj.id = uuid();
+    dispatch(signup(formObj));
+    setSuccessAlert(true);
+  };
+
+  const performValidation = (values) => {
+    const errors = {};
+    if (!values.email) {
+      errors.email = "Required Field";
+    } else {
+      const emailExist =
+        registerData && registerData.find((d) => d.email === values.email);
+      if (emailExist) {
+        errors.email = "Email already exists";
+      }
+    }
+    if (!values.password) {
+      errors.password = "Required Field";
+    }
+    if (!values.confirmPassword) {
+      errors.confirmPassword = "Required Field";
+    } else {
+      if (values.confirmPassword !== values.password) {
+        errors.confirmPassword = "Password not match";
+      }
     }
 
-    const emailExist =
-      registerData && registerData.find((d) => d.email === formObj.email);
-    if (emailExist) {
-      setErrorAlert(true);
-      setErrorMsg("Email already exists");
-    } else {
-      if (formObj.password !== formObj.confirmPassword) {
-        setErrorAlert(true);
-        setErrorMsg("Password and confirm-password are not same");
-        return;
-      }
-      formObj.id = uuid();
-      dispatch(signup(formObj));
-      setSuccessAlert(true);
-    }
+    return errors;
   };
 
   const [successAlert, setSuccessAlert] = useState(false);
-  const [errorAlert, setErrorAlert] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
   const onDismissSuccess = () => setSuccessAlert(false);
-  const onDismissError = () => setErrorAlert(false);
 
   return (
     <div className="centerElement">
       <div className="box">
-        <h6 className="text-center">
+        <img src={require("../images/logo.png").default} className="logo-img" />
+        <div className="text-center mt-3 mb-2" style={{ fontSize: "1.1em" }}>
           <b>Registration</b>
-        </h6>
+        </div>
         <FinalForm
           onSubmit={(formObj) => {
             registerUser(formObj);
           }}
+          validate={performValidation}
           render={({ handleSubmit }) => (
             <Form onSubmit={handleSubmit}>
-              <FormGroup>
-                <Label for="email">Email</Label>
-                <Field name="email">
-                  {({ input }) => <Input type="email" id="email" {...input} />}
-                </Field>
-              </FormGroup>
-              <FormGroup>
-                <Label for="password">Password</Label>
-                <Field name="password">
-                  {({ input }) => (
+              <Field name="email">
+                {({ input, meta }) => (
+                  <FormGroup>
+                    <Label for="email">Email</Label>
+                    <Input type="email" id="email" {...input} />
+                    {meta.error && meta.touched && (
+                      <span className="errors ml-1 ">{meta.error} !</span>
+                    )}
+                  </FormGroup>
+                )}
+              </Field>
+              <Field name="password">
+                {({ input, meta }) => (
+                  <FormGroup>
+                    <Label for="password">Password</Label>
                     <Input type="password" id="password" {...input} />
-                  )}
-                </Field>
-              </FormGroup>
-              <FormGroup>
-                <Label for="confirmPassword">Confirm Password</Label>
-                <Field name="confirmPassword">
-                  {({ input }) => (
+                    {meta.error && meta.touched && (
+                      <span className="errors ml-1 ">{meta.error} !</span>
+                    )}
+                  </FormGroup>
+                )}
+              </Field>
+              <Field name="confirmPassword">
+                {({ input, meta }) => (
+                  <FormGroup>
+                    <Label for="confirmPassword">Confirm Password</Label>
                     <Input type="password" id="confirmPassword" {...input} />
-                  )}
-                </Field>
-              </FormGroup>
-              <Button color="primary" className="rounded-pill">
-                Register
-              </Button>
+                    {meta.error && meta.touched && (
+                      <span className="errors ml-1 ">{meta.error} !</span>
+                    )}
+                  </FormGroup>
+                )}
+              </Field>
+              <Button className="glass-btn">Register</Button>
               <Alert
                 color="success"
                 isOpen={successAlert}
@@ -97,15 +110,6 @@ const Registration = () => {
                 style={{ width: "236.4px" }}
               >
                 Registeration successful. <Link to="/">Login here</Link>
-              </Alert>
-              <Alert
-                color="danger"
-                isOpen={errorAlert}
-                toggle={onDismissError}
-                className="mt-3"
-                style={{ width: "236.4px" }}
-              >
-                {errorMsg}
               </Alert>
             </Form>
           )}
