@@ -8,5 +8,6 @@ Below are some screenshots.
 
 ![Login](https://user-images.githubusercontent.com/37749074/115534682-a7078400-a2b5-11eb-9fd1-14280d3bf73c.png)
 
-![Home](https://user-images.githubusercontent.com/37749074/115534793-c30b2580-a2b5-11eb-822f-6a410ac4bc30.png)
+![Home](https://user-images.githubusercontent.com/37749074/115536296-45481980-a2b7-11eb-8c0a-38e48c84246a.png)
+
 
